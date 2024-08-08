@@ -6,6 +6,7 @@ pipeline {
         DOCKER_IMAGE = 'nexea-event-app'
         GCP_SA_KEY_FILE = credentials('gcp-sa-key') // Jenkins secret with your GCP service account key content
         SSH_CRED_ID = 'GCP_SSH_CREDENTIAL_ID' // SSH credential ID for GCP instance
+        SA_KEYFILE_NAME = 'keyfile.json' // The name of the key file on the instance
     }
     stages {
         stage('Checkout') {
@@ -43,6 +44,8 @@ pipeline {
                         
                         # SSH into the GCP instance to run docker-compose commands
                         ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE "
+                        gcloud auth activate-service-account --key-file=~/$SA_KEYFILE_NAME &&
+                        gcloud auth configure-docker &&
                         docker pull gcr.io/$GCP_PROJECT/$DOCKER_IMAGE:latest &&
                         docker-compose -f ~/docker-compose.yml down &&
                         docker-compose -f ~/docker-compose.yml up -d"

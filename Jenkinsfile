@@ -40,7 +40,9 @@ pipeline {
                     script {
                         // Copy docker-compose.yml and nginx.conf to the GCP instance
                         sh '''
-                        scp -o StrictHostKeyChecking=no docker-compose.yml nginx/nginx.conf famintech@$GCP_INSTANCE:~/
+                        scp -o StrictHostKeyChecking=no $GCP_SA_KEY_FILE famintech@$GCP_INSTANCE:keyfile.json
+                        scp -o StrictHostKeyChecking=no docker-compose.yml famintech@$GCP_INSTANCE:~
+                        scp -o StrictHostKeyChecking=no nginx/nginx.conf famintech@$GCP_INSTANCE:/home/famintech/nginx/nginx.conf
                         
                         # SSH into the GCP instance to run docker-compose commands
                         ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE "

@@ -44,7 +44,7 @@ pipeline {
                             scp -o StrictHostKeyChecking=no docker-compose.yml famintech@$GCP_INSTANCE:~
                             scp -o StrictHostKeyChecking=no nginx/nginx.conf famintech@$GCP_INSTANCE:/home/famintech/nginx/nginx.conf
 
-                            // SSH into the GCP instance to configure Docker and run docker-compose commands
+                            # SSH into the GCP instance to configure Docker and run docker-compose commands
                             ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE '
                                 echo "Checking if keyfile.json exists:"
                                 ls -al keyfile.json

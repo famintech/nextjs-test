@@ -4,20 +4,13 @@ pipeline {
         GCP_PROJECT = 'my-project-nexea'
         GCP_INSTANCE = 'nexea-event-app' // Ensure this is the external IP or hostname of your instance
         DOCKER_IMAGE = 'nexea-event-app'
-        GCP_SA_KEY = 'gcp-sa-key-file' // Jenkins secret file for your GCP service account key content
+        GCP_SA_KEY_FILE = credentials('gcp-sa-key') // Jenkins secret with your GCP service account key content
         SSH_CRED_ID = 'GCP_SSH_CREDENTIAL_ID' // SSH credential ID for GCP instance
     }
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-        stage('List Files for Debugging') {
-            steps {
-                script {
-                    sh 'ls -al'
-                }
             }
         }
         stage('Build Docker Image') {
@@ -30,7 +23,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: GCP_SA_KEY, variable: 'GCP_SA_KEY_FILE')]) {
+                    withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GCP_SA_KEY_FILE')]) {
                         sh """
                         cat $GCP_SA_KEY_FILE | docker login -u _json_key --password-stdin https://gcr.io
                         docker tag $DOCKER_IMAGE gcr.io/$GCP_PROJECT/$DOCKER_IMAGE:latest

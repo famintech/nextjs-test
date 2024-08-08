@@ -47,8 +47,8 @@ pipeline {
                         gcloud auth activate-service-account --key-file=$SA_KEYFILE_NAME &&
                         gcloud auth configure-docker &&
                         docker pull gcr.io/$GCP_PROJECT/$DOCKER_IMAGE:latest &&
-                        docker-compose -f ~/docker-compose.yml down &&
-                        docker-compose -f ~/docker-compose.yml up -d"
+                        docker compose -f ~/docker-compose.yml down &&
+                        docker compose -f ~/docker-compose.yml up -d"
                         '''
                     }
                 }

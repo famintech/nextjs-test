@@ -38,19 +38,23 @@ pipeline {
             steps {
                 sshagent([SSH_CRED_ID]) {
                     script {
-                        // Copy docker-compose.yml and nginx.conf to the GCP instance
+                        // Create directory with appropriate permissions and copy necessary files to the GCP instance
                         sh '''
-                        scp -o StrictHostKeyChecking=no $GCP_SA_KEY_FILE famintech@$GCP_INSTANCE:keyfile.json
-                        scp -o StrictHostKeyChecking=no docker-compose.yml famintech@$GCP_INSTANCE:~
-                        scp -o StrictHostKeyChecking=no nginx/nginx.conf famintech@$GCP_INSTANCE:/home/famintech/nginx/nginx.conf
-                        
-                        # SSH into the GCP instance to run docker-compose commands
-                        ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE "
-                        gcloud auth activate-service-account --key-file=$SA_KEYFILE_NAME &&
-                        gcloud auth configure-docker &&
-                        docker pull gcr.io/$GCP_PROJECT/$DOCKER_IMAGE:latest &&
-                        docker compose -f ~/docker-compose.yml down &&
-                        docker compose -f ~/docker-compose.yml up -d"
+                            ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE 'sudo mkdir -p /home/famintech/nginx && sudo chown -R famintech:famintech /home/famintech/nginx'
+                            scp -o StrictHostKeyChecking=no docker-compose.yml famintech@$GCP_INSTANCE:~
+                            scp -o StrictHostKeyChecking=no nginx/nginx.conf famintech@$GCP_INSTANCE:/home/famintech/nginx/nginx.conf
+
+                            // SSH into the GCP instance to configure Docker and run docker-compose commands
+                            ssh -o StrictHostKeyChecking=no famintech@$GCP_INSTANCE '
+                                echo "Checking if keyfile.json exists:"
+                                ls -al keyfile.json
+                                echo "Checking if /home/famintech/nginx/nginx.conf exists:"
+                                ls -al /home/famintech/nginx/nginx.conf
+                                gcloud auth activate-service-account --key-file=keyfile.json &&
+                                gcloud auth configure-docker &&
+                                docker pull gcr.io/$GCP_PROJECT/$DOCKER_IMAGE:latest &&
+                                docker-compose -f ~/docker-compose.yml down &&
+                                docker-compose -f ~/docker-compose.yml up -d'
                         '''
                     }
                 }
